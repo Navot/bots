@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<Creds>
+    <Cred id="1">
+        <device>@os='android'</device>
+        <appPath>bin\eribank.apk</appPath>
+        <appString>com.experitest.ExperiBank/.LoginActivity</appString>
+        <username>company</username>
+        <password>company</password>
+        <device></device>
+    </Cred>
+</Creds>
+
