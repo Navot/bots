@@ -32,15 +32,13 @@ public class BotObject {
 
     }
 
-    public String BotRun(String command) throws ParserConfigurationException, SAXException, IOException {
-
-        client.syncElements(1000,10000);
-        if (!CC.StillInApp()) return "WE ARE OUT!!";
-
+    public boolean BotRun(String command) throws ParserConfigurationException, SAXException, IOException {
+        //client.syncElements(1000,10000);
         Screen currentScreen = new Screen(command,CC.GetElements());
         System.out.println("Checking if the Dump Changed After - " + currentScreen.screenName);
         boolean dumpChangeFlag = CC.CheckDumpChanged(currentScreen,lastScreen);
         if (dumpChangeFlag) {
+            if (!CC.StillInApp()) return true;
 
             Screen VisitedScreen = SM.CheckIfBeenHereBefore(currentScreen);
 
@@ -53,39 +51,41 @@ public class BotObject {
 
                 System.out.println("All Elements On the Screen:\n"+Utilities.MapToString(currentScreen.elementsMap));
 
-                StartWorkingOnElementsMap(currentScreen.elementsMap);
+                StartWorkingOnElementsMap(currentScreen);
 
-                return "-> ";
+                return true;
             } else {
                 System.out.println("VisitedScreen - " + VisitedScreen);
                 SM.AddScreen(currentScreen);
-                return "-> ";
+                return true;
             }
         } else {
             System.out.println("This Action - " + command + "  Apparently (!!!) Does Nothing");
-            return "-> This Action - " + command + "  Apparently (!!!) Does Nothing\n";
+            return false;
         }
     }
 
-    private void StartWorkingOnElementsMap(Map<String, Element> elementsMap) throws ParserConfigurationException, SAXException, IOException {
+    private void StartWorkingOnElementsMap(Screen currentScreen) throws ParserConfigurationException, SAXException, IOException {
         System.out.println("Trying To click in the new screen");
-        Iterator<Map.Entry<String,Element>> iter = elementsMap.entrySet().iterator();
+        Iterator<Map.Entry<String,Element>> iter = currentScreen.elementsMap.entrySet().iterator();
         boolean wasClicked=false;
 
         while (iter.hasNext()) {
+            System.out.println("Get Ready For A Click!");
             Map.Entry<String, Element> UIElement = iter.next();
-            if (UIElement.getKey().contains("Button")& !UIElement.getValue().getAttribute("x").contains("-")){
-                System.out.println("IT'S A BUTTON - "+UIElement.getKey().toString());
+            if(!UIElement.getValue().getAttribute("x").contains("-")){
+                System.out.println("IT'S A - "+UIElement.getKey().toString());
                 wasClicked = clicker.ClickingOnElementWithProperty(UIElement);
             }
-            else if (UIElement.getKey().contains("TextView") & !UIElement.getValue().getAttribute("x").contains("-")) {
-                System.out.println("IT'S A TextView - " + UIElement.getKey().toString());
-                wasClicked = clicker.ClickingOnElementWithProperty(UIElement);
-            }
-
-
             if(wasClicked){
-                BotRun(Utilities.GetLastCommandString(client));
+
+                boolean actionStatus = BotRun(Utilities.GetLastCommandString(client));
+                if (!actionStatus){
+                    System.out.println("Still On Screen - "+currentScreen.screenName);
+                }
+                else{
+                    
+                }
             }
             else{
                 System.out.println(UIElement.getKey()+" - DOES NOTHING?");

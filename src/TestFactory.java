@@ -28,13 +28,11 @@ public class TestFactory {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        out.println(lastScreen.screenName);
+
+        if(lastScreen!=null)out.println(lastScreen.screenName);
         out.println(currentScreen.command);
         out.println(currentScreen.screenName);
-
         out.println("---------------------------------------------------------------------------------------------------------------------------------------");
-
-
         out.close();
     }
 

@@ -1,6 +1,7 @@
 import com.experitest.client.Client;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -8,6 +9,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -45,7 +47,7 @@ public class Utilities {
     public static Document getDocumentFromString(String screenElements) throws ParserConfigurationException, SAXException, IOException {
         DocumentBuilderFactory domFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = domFactory.newDocumentBuilder();
-        Document dDoc = builder.parse(screenElements);
+        Document dDoc = builder.parse(new InputSource(new StringReader(screenElements)));
         dDoc.getDocumentElement().normalize();
         return dDoc;
     }

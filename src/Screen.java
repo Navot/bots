@@ -16,7 +16,8 @@ public class Screen {
 
     public Screen(String command, String screenElements) throws IOException, SAXException, ParserConfigurationException {
         this.command =command;
-        this.screenName = command.substring(command.indexOf("=")+1,command.indexOf(" in")).replace("'","").replace("[","").trim();
+
+        this.screenName = (!command.contains("Click")) ? command : command.substring(command.indexOf("=")+1,command.indexOf(" in")).replace("'","").replace("[","").trim();
 
         this.screenElements =screenElements;
         Document elementsDoc = Utilities.getDocumentFromString(screenElements);
