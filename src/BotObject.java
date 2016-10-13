@@ -68,23 +68,27 @@ public class BotObject {
     private void StartWorkingOnElementsMap(Screen currentScreen) throws ParserConfigurationException, SAXException, IOException {
         System.out.println("Trying To click in the new screen");
         Iterator<Map.Entry<String,Element>> iter = currentScreen.elementsMap.entrySet().iterator();
-        boolean wasClicked=false;
+        Map<String,String> clickResult = new HashMap<>();
 
         while (iter.hasNext()) {
             System.out.println("Get Ready For A Click!");
             Map.Entry<String, Element> UIElement = iter.next();
             if(!UIElement.getValue().getAttribute("x").contains("-")){
                 System.out.println("IT'S A - "+UIElement.getKey().toString());
-                wasClicked = clicker.ClickingOnElementWithProperty(UIElement);
+                clickResult = clicker.ClickingOnElement(UIElement);
             }
-            if(wasClicked){
-
-                boolean actionStatus = BotRun(Utilities.GetLastCommandString(client));
+            if(clickResult.get("result").equals("true")){
+                boolean actionStatus = BotRun(clickResult.get("command"));
                 if (!actionStatus){
-                    System.out.println("Still On Screen - "+currentScreen.screenName);
+                    System.out.println("Still On Screen: "+currentScreen.screenName);
                 }
                 else{
-                    
+                    if (Navigate(currentScreen)){
+                        System.out.println("Got Back To: "+currentScreen.screenName);
+                    }
+                    else{
+                        System.out.println("Can't Get Back To: "+ currentScreen.screenName);
+                    }
                 }
             }
             else{
@@ -94,9 +98,10 @@ public class BotObject {
 
     }
 
+    private boolean Navigate(Screen currentScreen) {
 
-
-
+        return false;
+    }
 
 
 }
