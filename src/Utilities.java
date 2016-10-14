@@ -22,7 +22,7 @@ public class Utilities {
 
         StringBuilder sb = new StringBuilder();
         Iterator<Map.Entry<String,Element>> iter = elementsMap.entrySet().iterator();
-        sb.append("------------------------------------------------------------");
+        sb.append("------------------------------------------------------------\n");
         while (iter.hasNext()) {
             Map.Entry<String,Element> entry = iter.next();
             sb.append(entry.getKey());

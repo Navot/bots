@@ -1,9 +1,5 @@
 import com.experitest.client.Client;
 import org.apache.commons.io.FileUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -12,9 +8,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by navot on 12/10/2016.
@@ -33,7 +27,7 @@ public class ScreensManager {
         System.out.println("Checking If We Have Been Here Before");
         Screen VisitedScreen=null;
         for (Screen repoScreen : screenList) {
-            if (ChangeChecker.CheckDumpChanged(currentScreen,repoScreen))
+            if (!ChangeChecker.IsDumpDifferent(currentScreen,repoScreen))
             {
                 VisitedScreen = repoScreen;
             }
@@ -51,6 +45,7 @@ public class ScreensManager {
     public boolean AddScreen(Screen currentScreen) throws IOException, SAXException, ParserConfigurationException {
 
         screenList.add(currentScreen);
+        AddToRepo(currentScreen);
 
         return true;
     }

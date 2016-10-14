@@ -1,11 +1,12 @@
 import org.w3c.dom.Element;
+import org.w3c.dom.ls.DOMImplementationLS;
+import org.w3c.dom.ls.LSSerializer;
 
+import javax.xml.transform.TransformerException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -49,11 +50,23 @@ public class TestFactory {
         for (Map.Entry<String, Element> UIElement : currentScreen.elementsMap.entrySet()) {
 
             out.println(UIElement.getKey());
-            out.println(UIElement.getValue().toString());
+            try {
+                out.println(printElement(UIElement.getValue()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (TransformerException e) {
+                e.printStackTrace();
+            }
             out.println("---------------------------------------------------------------------------------------------------------------------------------------");
 
         }
         out.close();
         System.out.println("Done Creating Layout Test - Tests\\LT_"+currentScreen.screenName);
+    }
+    public static String printElement(Element node) throws IOException, TransformerException {
+        DOMImplementationLS lsImpl = (DOMImplementationLS)node.getOwnerDocument().getImplementation().getFeature("LS", "3.0");
+        LSSerializer serializer = lsImpl.createLSSerializer();
+        serializer.getDomConfig().setParameter("xml-declaration", false); //by default its true, so set it to false to get String without xml-declaration
+        return serializer.writeToString(node);
     }
 }

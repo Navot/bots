@@ -21,17 +21,17 @@ public class Clicker {
         Map<String, String> clickResult = new HashMap<>();
        if(ClickingOnElementWithProperty(entry,"id")){
            clickResult.put("result","true");
-           clickResult.put("command",command);
+           clickResult.put("step",command);
            return clickResult;
        }
         if (ClickingOnElementWithProperty(entry,"contentDescription")){
             clickResult.put("result","true");
-            clickResult.put("command",command);
+            clickResult.put("step",command);
             return clickResult;
         }
         if (ClickingOnElementWithTEXT(entry)){
             clickResult.put("result","true");
-            clickResult.put("command",command);
+            clickResult.put("step",command);
             return clickResult;
         }
         clickResult.put("result","false");

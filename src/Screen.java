@@ -2,10 +2,20 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.w3c.dom.ls.DOMImplementationLS;
+import org.w3c.dom.ls.LSSerializer;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -35,16 +45,17 @@ public class Screen {
         Map<String,Element> MAP =new HashMap<>();
 
         try {
-            NodeList nList = elementsDoc.getElementsByTagName("node");
-            for (int temp = 0; temp < nList.getLength(); temp++) {
+            NodeList nodeList = elementsDoc.getElementsByTagName("node");
+            for (int temp = 0; temp < nodeList.getLength(); temp++) {
 
-                Node nNode = nList.item(temp);
-                if (nNode.getNodeType() == Node.ELEMENT_NODE) {
-                    Element eElement = (Element) nNode;
-                    if(eElement.getAttribute("class").contains("TextView"))MAP.put("TextView_"+eElement.getAttribute("id") + " "+temp,eElement);
-                    if(eElement.getAttribute("class").contains("ImageView"))MAP.put("ImageView_"+eElement.getAttribute("id") + " "+temp,eElement);
-                    if(eElement.getAttribute("class").contains("EditText"))MAP.put("EditText_"+eElement.getAttribute("id") + " "+temp,eElement);
-                    if(eElement.getAttribute("class").contains("Button"))MAP.put("Button_"+eElement.getAttribute("id") + " "+temp,eElement);
+                Node node = nodeList.item(temp);
+                if (node.getNodeType() == Node.ELEMENT_NODE) {
+                    Element element = (Element) node;
+                    //System.out.println(printElement(element));
+                    if(element.getAttribute("class").contains("TextView"))MAP.put("TextView_"+element.getAttribute("id") + " "+temp,element);
+                    if(element.getAttribute("class").contains("ImageView"))MAP.put("ImageView_"+element.getAttribute("id") + " "+temp,element);
+                    if(element.getAttribute("class").contains("EditText"))MAP.put("EditText_"+element.getAttribute("id") + " "+temp,element);
+                    if(element.getAttribute("class").contains("Button"))MAP.put("Button_"+element.getAttribute("id") + " "+temp,element);
 
                 }
             }
@@ -53,4 +64,23 @@ public class Screen {
         }
         return MAP;
     }
+    public static void printDocument(Document doc, OutputStream out) throws IOException, TransformerException {
+        TransformerFactory tf = TransformerFactory.newInstance();
+        Transformer transformer = tf.newTransformer();
+        transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
+        transformer.setOutputProperty(OutputKeys.METHOD, "xml");
+        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+        transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+        transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+
+        transformer.transform(new DOMSource(doc),
+                new StreamResult(new OutputStreamWriter(out, "UTF-8")));
+    }
+    public static String printElement(Element node) throws IOException, TransformerException {
+        DOMImplementationLS lsImpl = (DOMImplementationLS)node.getOwnerDocument().getImplementation().getFeature("LS", "3.0");
+        LSSerializer serializer = lsImpl.createLSSerializer();
+        serializer.getDomConfig().setParameter("xml-declaration", false); //by default its true, so set it to false to get String without xml-declaration
+       return serializer.writeToString(node);
+    }
+
 }

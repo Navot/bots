@@ -41,7 +41,7 @@ public class BotObject {
         System.out.println("Checking if the Dump Changed After - " + command);
         Screen currentScreen = new Screen(command,CC.GetElements());
 
-        boolean dumpChangeFlag = CC.CheckDumpChanged(currentScreen,lastScreen);
+        boolean dumpChangeFlag = CC.IsDumpDifferent(currentScreen,lastScreen);
         if (dumpChangeFlag) {
             if (!CC.StillInApp()) return true;
             route.add(command);
@@ -61,7 +61,7 @@ public class BotObject {
 
                 return true;
             } else {
-                System.out.println("VisitedScreen - " + VisitedScreen);
+                System.out.println("VisitedScreen - " + VisitedScreen.screenName);
                 SM.AddRoute(currentScreen,route);
                 //SM.AddScreen(currentScreen);
                 return true;
@@ -94,6 +94,7 @@ public class BotObject {
                 else{
                     if (Navigate(currentScreen)){
                         System.out.println("Got Back To: "+currentScreen.screenName);
+                        lastScreen = currentScreen;
                     }
                     else{
                         System.out.println("Can't Get Back To: "+ currentScreen.screenName);
@@ -108,6 +109,16 @@ public class BotObject {
     }
 
     private boolean Navigate(Screen currentScreen) {
+        for (List list :
+                currentScreen.rouths) {
+            System.out.println("Printing Routs: ");
+            System.out.println();
+            for (int i = 0; i < list.size(); i++) {
+                System.out.print(list.get(i)+"->");
+            }
+            System.out.println();
+        }
+        System.out.println(currentScreen.rouths);
 
         return false;
     }

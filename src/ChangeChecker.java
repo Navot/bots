@@ -18,12 +18,12 @@ public class ChangeChecker {
         this.appNameFromDevice =appNameFromDevice;
     }
 
-    public static boolean CheckDumpChanged(Screen currentScreen,Screen lastScreen) {
+    public static boolean IsDumpDifferent(Screen currentScreen, Screen lastScreen) {
         if (lastScreen != null)
         {
             double result = getWeight(lastScreen.screenElements, currentScreen.screenElements);
             System.out.println("The Distance From "+currentScreen.screenName+" To Previous - " + lastScreen.screenName+ "  Is: " + result );
-            if (result > 0.95)
+            if (result > 0.999)
                 return false;
             else {
                 return true;
