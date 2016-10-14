@@ -35,7 +35,7 @@ public class Clicker {
             return clickResult;
         }
         clickResult.put("result","false");
-        clickResult.put("command",command);
+        clickResult.put("step",command);
         return clickResult;
     }
 

@@ -29,6 +29,7 @@ public class ChangeChecker {
                 return true;
             }
         }else {
+            System.out.println("We have no previous screen!");
             return true;
         }
     }

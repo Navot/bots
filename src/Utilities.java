@@ -44,6 +44,7 @@ public class Utilities {
         dDoc.getDocumentElement().normalize();
         return dDoc;
     }
+
     public static Document getDocumentFromString(String screenElements) throws ParserConfigurationException, SAXException, IOException {
         DocumentBuilderFactory domFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = domFactory.newDocumentBuilder();

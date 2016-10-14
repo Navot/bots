@@ -12,6 +12,7 @@ import java.util.*;
 public class BotObject {
     Screen lastScreen =null;
     List<Screen> screensList = null;
+    List<String> route=null;
     Client client = null;
     String command =null;
     Clicker clicker = null;
@@ -19,11 +20,14 @@ public class BotObject {
     ScreensManager SM =null;
     TestFactory TF = null;
 
+
+
     public BotObject(String command, Client client, String appNameFromDevice) throws IOException, SAXException, ParserConfigurationException {
 
         this.command =command;
         this.client=client;
         screensList = new ArrayList<>();
+        route = new ArrayList<>();
         SM = new ScreensManager(client);
         clicker = new Clicker(client);
         CC = new ChangeChecker(client,appNameFromDevice);
@@ -34,17 +38,19 @@ public class BotObject {
 
     public boolean BotRun(String command) throws ParserConfigurationException, SAXException, IOException {
         //client.syncElements(1000,10000);
+        System.out.println("Checking if the Dump Changed After - " + command);
         Screen currentScreen = new Screen(command,CC.GetElements());
-        System.out.println("Checking if the Dump Changed After - " + currentScreen.screenName);
+
         boolean dumpChangeFlag = CC.CheckDumpChanged(currentScreen,lastScreen);
         if (dumpChangeFlag) {
             if (!CC.StillInApp()) return true;
-
+            route.add(command);
             Screen VisitedScreen = SM.CheckIfBeenHereBefore(currentScreen);
 
             if (VisitedScreen==null) {
                 System.out.println("Adding a new Screen: "+currentScreen.screenName);
                 SM.AddScreen(currentScreen);
+                SM.AddRoute(currentScreen,route);
                 TF.CreateFunctionalTest(currentScreen,lastScreen);
                 TF.CreateLayoutTest(currentScreen);
                 lastScreen = currentScreen;
@@ -56,7 +62,8 @@ public class BotObject {
                 return true;
             } else {
                 System.out.println("VisitedScreen - " + VisitedScreen);
-                SM.AddScreen(currentScreen);
+                SM.AddRoute(currentScreen,route);
+                //SM.AddScreen(currentScreen);
                 return true;
             }
         } else {
@@ -78,7 +85,9 @@ public class BotObject {
                 clickResult = clicker.ClickingOnElement(UIElement);
             }
             if(clickResult.get("result").equals("true")){
-                boolean actionStatus = BotRun(clickResult.get("command"));
+                System.out.println("Click Was OK");
+                System.out.println("Running A New Bot! - "+clickResult.get("step"));
+                boolean actionStatus = BotRun(clickResult.get("step"));
                 if (!actionStatus){
                     System.out.println("Still On Screen: "+currentScreen.screenName);
                 }

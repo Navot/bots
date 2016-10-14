@@ -22,9 +22,10 @@ public class TestFactory {
     }
 
     public void CreateFunctionalTest(Screen currentScreen, Screen lastScreen) {
+        System.out.println("Creating Functional Test For - "+currentScreen.screenName);
         PrintWriter out = null;
         try {
-            out = new PrintWriter("Tests\\"+currentScreen.screenName);
+            out = new PrintWriter("Tests\\FT_"+currentScreen.screenName);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -34,22 +35,25 @@ public class TestFactory {
         out.println(currentScreen.screenName);
         out.println("---------------------------------------------------------------------------------------------------------------------------------------");
         out.close();
+        System.out.println("Done Creating Functional Test - Tests\\FT_"+currentScreen.screenName);
     }
 
     public void CreateLayoutTest(Screen currentScreen) {
+        System.out.println("Creating Layout Test For - "+currentScreen.screenName);
         PrintWriter out = null;
         try {
-            out = new PrintWriter("Tests\\"+currentScreen.screenName);
+            out = new PrintWriter("Tests\\LT_"+currentScreen.screenName);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
         for (Map.Entry<String, Element> UIElement : currentScreen.elementsMap.entrySet()) {
 
             out.println(UIElement.getKey());
-            out.println(UIElement.getValue());
+            out.println(UIElement.getValue().toString());
             out.println("---------------------------------------------------------------------------------------------------------------------------------------");
 
         }
         out.close();
+        System.out.println("Done Creating Layout Test - Tests\\LT_"+currentScreen.screenName);
     }
 }

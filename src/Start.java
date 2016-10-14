@@ -32,7 +32,7 @@ public class Start implements Runnable {
         }
         try {
             BotObject bot = new BotObject("Launching",client,appNameFromDevice);
-            bot.BotRun("Launching = First_Screen");
+            bot.BotRun("Launching = LandingPage");
         } catch (IOException e) {
             e.printStackTrace();
         } catch (SAXException e) {
