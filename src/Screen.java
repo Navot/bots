@@ -27,18 +27,19 @@ public class Screen {
     String screenElements;
     String command;
     Map<String, Element>  elementsMap = null;
-    List<List<String>> rouths = null;
+    List<List<String>> routes = null;
+
 
     public Screen(String command, String screenElements) throws IOException, SAXException, ParserConfigurationException {
         this.command =command;
-        this.screenName = command.substring(command.indexOf("=")+1).replace("'","").trim();
+        this.screenName = command.substring(command.indexOf("=")+1).replace("'","").replace(":","_").trim();
 
-        this.screenElements =screenElements;
+        this.screenElements = screenElements;
 
         Document elementsDoc = Utilities.getDocumentFromString(screenElements);
         elementsMap = GetVIPElementsFromDoc(elementsDoc);
 
-        rouths = new ArrayList<>();
+        routes = new ArrayList<>();
 
     }
     public static Map<String, Element> GetVIPElementsFromDoc(Document elementsDoc) {
@@ -51,11 +52,15 @@ public class Screen {
                 Node node = nodeList.item(temp);
                 if (node.getNodeType() == Node.ELEMENT_NODE) {
                     Element element = (Element) node;
-                    //System.out.println(printElement(element));
-                    if(element.getAttribute("class").contains("TextView"))MAP.put("TextView_"+element.getAttribute("id") + " "+temp,element);
-                    if(element.getAttribute("class").contains("ImageView"))MAP.put("ImageView_"+element.getAttribute("id") + " "+temp,element);
-                    if(element.getAttribute("class").contains("EditText"))MAP.put("EditText_"+element.getAttribute("id") + " "+temp,element);
-                    if(element.getAttribute("class").contains("Button"))MAP.put("Button_"+element.getAttribute("id") + " "+temp,element);
+                  //  System.out.println(printElement(element));
+                    if(element.getAttribute("class").contains("TextView"))
+                        MAP.put("TextView_"+element.getAttribute("id") + " "+temp,element);
+                    if(element.getAttribute("class").contains("ImageView"))
+                        MAP.put("ImageView_"+element.getAttribute("id") + " "+temp,element);
+                    /*if(element.getAttribute("class").contains("EditText"))
+                        MAP.put("EditText_"+element.getAttribute("id") + " "+temp,element);*/
+                    if(element.getAttribute("class").contains("Button"))
+                        MAP.put("Button_"+element.getAttribute("id") + " "+temp,element);
 
                 }
             }
@@ -83,4 +88,21 @@ public class Screen {
        return serializer.writeToString(node);
     }
 
+
+    public void AddRoute(List<String> commandList){
+        routes.add(commandList);
+    }
+
+    public List<String> getShortestRoute() {
+        List<String> shortestRoute = null;
+        int minRouteLength = 1000;
+        for ( List<String> route : routes) {
+            if (route.size()<minRouteLength){
+                minRouteLength=route.size();
+                shortestRoute = route;
+            }
+
+        }
+        return shortestRoute;
+    }
 }

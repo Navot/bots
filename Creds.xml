@@ -3,7 +3,7 @@
     <Cred id="1">
         <device>@os='android'</device>
         <appPath>bin\eribank.apk</appPath>
-        <appString>com.experitest.ExperiBank/.LoginActivity</appString>
+        <appString>com.google.android.music/com.android.music.activitymanagement.TopLevelActivity</appString>
         <username>company</username>
         <password>company</password>
         <device></device>

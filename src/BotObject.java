@@ -12,9 +12,9 @@ import java.util.*;
 public class BotObject {
     Screen lastScreen =null;
     List<Screen> screensList = null;
-    List<String> route=null;
+
     Client client = null;
-    String command =null;
+
     Clicker clicker = null;
     ChangeChecker CC = null;
     ScreensManager SM =null;
@@ -22,12 +22,9 @@ public class BotObject {
 
 
 
-    public BotObject(String command, Client client, String appNameFromDevice) throws IOException, SAXException, ParserConfigurationException {
-
-        this.command =command;
+    public BotObject(Client client, String appNameFromDevice) throws IOException, SAXException, ParserConfigurationException {
         this.client=client;
         screensList = new ArrayList<>();
-        route = new ArrayList<>();
         SM = new ScreensManager(client);
         clicker = new Clicker(client);
         CC = new ChangeChecker(client,appNameFromDevice);
@@ -36,40 +33,38 @@ public class BotObject {
 
     }
 
-    public boolean BotRun(String command) throws ParserConfigurationException, SAXException, IOException {
-        //client.syncElements(1000,10000);
-        System.out.println("Checking if the Dump Changed After - " + command);
-        Screen currentScreen = new Screen(command,CC.GetElements());
+    public String BotRun(List<String> commandList) throws ParserConfigurationException, SAXException, IOException {
+
+        System.out.println("Checking if the Dump Changed After - " + commandList.get(commandList.size()-1));
+        Screen currentScreen = new Screen(commandList.get(commandList.size()-1),CC.GetElements());
 
         boolean dumpChangeFlag = CC.IsDumpDifferent(currentScreen,lastScreen);
-        if (dumpChangeFlag) {
-            if (!CC.StillInApp()) return true;
-            route.add(command);
-            Screen VisitedScreen = SM.CheckIfBeenHereBefore(currentScreen);
 
-            if (VisitedScreen==null) {
-                System.out.println("Adding a new Screen: "+currentScreen.screenName);
-                SM.AddScreen(currentScreen);
-                SM.AddRoute(currentScreen,route);
-                TF.CreateFunctionalTest(currentScreen,lastScreen);
-                TF.CreateLayoutTest(currentScreen);
-                lastScreen = currentScreen;
-
-                System.out.println("All Elements On the Screen:\n"+Utilities.MapToString(currentScreen.elementsMap));
-
-                StartWorkingOnElementsMap(currentScreen);
-
-                return true;
-            } else {
-                System.out.println("VisitedScreen - " + VisitedScreen.screenName);
-                SM.AddRoute(currentScreen,route);
-                //SM.AddScreen(currentScreen);
-                return true;
-            }
-        } else {
-            System.out.println("This Action - " + command + "  Apparently (!!!) Does Nothing");
-            return false;
+        if (!dumpChangeFlag){
+            System.out.println("This Action - " + commandList.get(commandList.size()-1) + "  Apparently (!!!) Does Nothing");
+            return "nothing";
         }
+        if (!CC.StillInApp()) return "out";
+
+        Screen VisitedScreen = SM.CheckIfBeenHereBefore(currentScreen);
+        if (VisitedScreen==null) {
+            System.out.println("Adding a new Screen: "+currentScreen.screenName);
+            SM.AddScreen(currentScreen);
+            currentScreen.AddRoute(commandList);
+            TF.CreatePathTest(currentScreen);
+            TF.CreateLayoutTest(currentScreen);
+            lastScreen = currentScreen;
+
+            System.out.println("All Elements On the Screen:\n"+Utilities.MapToString(currentScreen.elementsMap));
+            StartWorkingOnElementsMap(currentScreen);
+            return "done";
+        } else {
+            System.out.println("VisitedScreen - " + VisitedScreen.screenName);
+            VisitedScreen.AddRoute(commandList);
+            TF.CreatePathTest(VisitedScreen);
+            return "visited";
+        }
+
     }
 
     private void StartWorkingOnElementsMap(Screen currentScreen) throws ParserConfigurationException, SAXException, IOException {
@@ -80,47 +75,72 @@ public class BotObject {
         while (iter.hasNext()) {
             System.out.println("Get Ready For A Click!");
             Map.Entry<String, Element> UIElement = iter.next();
-            if(!UIElement.getValue().getAttribute("x").contains("-")){
+            if(!UIElement.getValue().getAttribute("x").contains("-")&& !(Integer.parseInt(UIElement.getValue().getAttribute("y"))>1920)){
                 System.out.println("IT'S A - "+UIElement.getKey().toString());
                 clickResult = clicker.ClickingOnElement(UIElement);
             }
             if(clickResult.get("result").equals("true")){
-                System.out.println("Click Was OK");
-                System.out.println("Running A New Bot! - "+clickResult.get("step"));
-                boolean actionStatus = BotRun(clickResult.get("step"));
-                if (!actionStatus){
-                    System.out.println("Still On Screen: "+currentScreen.screenName);
+                System.out.println("Click Was OK on " + clickResult.get("step"));
+                try {
+                    Thread.sleep(1500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
-                else{
-                    if (Navigate(currentScreen)){
-                        System.out.println("Got Back To: "+currentScreen.screenName);
-                        lastScreen = currentScreen;
-                    }
-                    else{
-                        System.out.println("Can't Get Back To: "+ currentScreen.screenName);
-                    }
+                List<String> commandsList = new ArrayList (currentScreen.routes.get(currentScreen.routes.size()-1));
+                commandsList.add(clickResult.get("step"));
+                String botResult = BotRun(commandsList);
+                switch (botResult){
+                    case "nothing":
+                        System.out.println("Still On Screen: "+currentScreen.screenName);
+                        break;
+                    case "out":
+                        System.out.println("Got Out Of The App!! -> Getting Back");
+                        Navigate(currentScreen);
+                        break;
+                    case "done":
+                        System.out.println("Done Here!!");
+                        Navigate(currentScreen);
+                        break;
+                    case "visited":
+                        System.out.println("Been Here!! -> Getting Back");
+                        Navigate(currentScreen);
+                        break;
                 }
             }
             else{
-                System.out.println(UIElement.getKey()+" - DOES NOTHING?");
+                System.out.println("Click Was NOT GOOD on " + clickResult.get("step"));
             }
         }
 
     }
 
     private boolean Navigate(Screen currentScreen) {
-        for (List list :
-                currentScreen.rouths) {
+      /*  for (List list : currentScreen.routes) {
             System.out.println("Printing Routs: ");
             System.out.println();
             for (int i = 0; i < list.size(); i++) {
                 System.out.print(list.get(i)+"->");
             }
             System.out.println();
+        }*/
+        System.out.println(currentScreen.routes);
+        List<String> commandList = currentScreen.getShortestRoute();
+        for (int i = 0; i < commandList.size(); i++) {
+            Perform(commandList.get(i));
         }
-        System.out.println(currentScreen.rouths);
-
+        lastScreen=currentScreen;
         return false;
+    }
+
+    private void Perform(String command) {
+        if (command.contains("Launching")){
+            client.launch(Start.getMAP().get("appString"),false,true);
+            client.syncElements(2000,20000);
+        }
+        if (command.contains("ClickingOnElement")){
+            client.click("NATIVE",command.substring(command.indexOf('-')+2),0,1);
+            client.syncElements(2000,20000);
+        }
     }
 
 

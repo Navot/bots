@@ -22,19 +22,20 @@ public class TestFactory {
         steps=new ArrayList<>();
     }
 
-    public void CreateFunctionalTest(Screen currentScreen, Screen lastScreen) {
+    public void CreatePathTest(Screen currentScreen) {
         System.out.println("Creating Functional Test For - "+currentScreen.screenName);
         PrintWriter out = null;
         try {
-            out = new PrintWriter("Tests\\FT_"+currentScreen.screenName);
+            out = new PrintWriter("Tests\\FT_"+currentScreen.screenName+"_"+currentScreen.routes.size());
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+        List<String> route = currentScreen.routes.get(currentScreen.routes.size()-1);
+        for (int i = 0; i < route.size(); i++) {
+            out.println(route.get(i));
+            out.println("---------------------------------------------------------------------------------------------------------------------------------------");
 
-        if(lastScreen!=null)out.println(lastScreen.screenName);
-        out.println(currentScreen.command);
-        out.println(currentScreen.screenName);
-        out.println("---------------------------------------------------------------------------------------------------------------------------------------");
+        }
         out.close();
         System.out.println("Done Creating Functional Test - Tests\\FT_"+currentScreen.screenName);
     }

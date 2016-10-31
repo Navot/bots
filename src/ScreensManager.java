@@ -30,16 +30,14 @@ public class ScreensManager {
             if (!ChangeChecker.IsDumpDifferent(currentScreen,repoScreen))
             {
                 VisitedScreen = repoScreen;
+                System.out.println("We Were Here Before - It Was Called "+VisitedScreen.screenName);
+                return VisitedScreen;
             }
         }
-        if (VisitedScreen!=null){
-            System.out.println("We Were Here Before - It Was Called "+VisitedScreen.screenName);
-            return VisitedScreen;
-        }
-        else{
-            System.out.println("We Weren't Here");
-            return null;
-        }
+
+        System.out.println("We Weren't Here");
+        return null;
+
     }
 
     public boolean AddScreen(Screen currentScreen) throws IOException, SAXException, ParserConfigurationException {
@@ -79,7 +77,5 @@ public class ScreensManager {
 
 
 
-    public void AddRoute(Screen currentScreen, List<String> route) {
-        currentScreen.rouths.add(route);
-    }
+
 }

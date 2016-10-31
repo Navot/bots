@@ -4,6 +4,7 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -15,8 +16,13 @@ public class Start implements Runnable {
     protected Client client = null;
     private String host = "localhost";
     private int port = 8889;
-    public Map<String,String> MAP=null;
-    String appNameFromDevice="";
+    public static Map<String,String> MAP=null;
+    public String appNameFromDevice="";
+
+    public static Map<String, String> getMAP() {
+        return MAP;
+    }
+
     public Start(Map<String,String> MAP){
         this.MAP=MAP;
     }
@@ -31,8 +37,11 @@ public class Start implements Runnable {
 
         }
         try {
-            BotObject bot = new BotObject("Launching",client,appNameFromDevice);
-            bot.BotRun("Launching = LandingPage");
+            BotObject bot = new BotObject(client,appNameFromDevice);
+            List<String> commandsList= new ArrayList();
+            commandsList.add("Launching = LandingPage");
+            bot.BotRun(commandsList);
+            System.out.println("----------- DONE WITH APP -----------");
         } catch (IOException e) {
             e.printStackTrace();
         } catch (SAXException e) {
@@ -67,7 +76,7 @@ public class Start implements Runnable {
         client.click("NATIVE", "xpath=/*//*[@id='loginButton']", 0, 1);*/
 
         String s = client.getCurrentApplicationName();
-        client.syncElements(2000,10000);
+        client.syncElements(2000,20000);
         return s;
     }
 }
