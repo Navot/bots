@@ -1,5 +1,7 @@
 import com.experitest.client.Client;
+import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -12,67 +14,91 @@ import java.util.Map;
  */
 public class Clicker {
     private Client client=null;
-    String command="";
+
     public Clicker(Client client){
         this.client=client;
     }
 
     public Map<String, String> ClickingOnElement(Map.Entry<String, Element> entry) throws IOException, ParserConfigurationException, SAXException {
-        Map<String, String> clickResult = new HashMap<>();
-       if(ClickingOnElementWithProperty(entry,"id")){
-           clickResult.put("result","true");
-           clickResult.put("step",command);
-           return clickResult;
-       }
-        if (ClickingOnElementWithProperty(entry,"contentDescription")){
-            clickResult.put("result","true");
-            clickResult.put("step",command);
-            return clickResult;
-        }
-        if (ClickingOnElementWithTEXT(entry)){
-            clickResult.put("result","true");
-            clickResult.put("step",command);
-            return clickResult;
-        }
-        clickResult.put("result","false");
-        clickResult.put("step",command);
-        return clickResult;
-    }
-
-    public Boolean ClickingOnElementWithProperty(Map.Entry<String, Element> entry, String property) throws IOException, ParserConfigurationException, SAXException {
-       if(!entry.getValue().getAttribute(property).equals("")){
-            System.out.println("ClickingOnElement - "+property+"="+entry.getValue().getAttribute(property));
-            try{
-                client.click("Native",property+"="+entry.getValue().getAttribute(property),0,1);
-                command = ("ClickingOnElement - "+property+"="+entry.getValue().getAttribute(property));
-                return true;
-            }catch (Exception e){
-                System.out.println("Could not click on "+property+"="+entry.getValue().getAttribute(property));
-                System.out.println("Returning FALSE");
-                return false;
+        Map<String, String> resultMap = new HashMap<>();
+        String[] identifier = GetIdentifier(entry);
+        if (identifier!= null){
+            System.out.println("Found a good identifier -" + identifier[0] +" = "+identifier[1]);
+            if(Click(identifier)){
+                resultMap.put("result","true");
+                resultMap.put("step","Click on - "+identifier[0] +" = "+identifier[1]);
+                return resultMap;
             }
         }
-        return false;
+        resultMap.put("result","false");
+        resultMap.put("step",null);
+        return resultMap;
+
     }
 
-    public Boolean ClickingOnElementWithTEXT(Map.Entry<String, Element> entry) throws IOException, ParserConfigurationException, SAXException {
+    private boolean Click(String[] identifier) {
+        try {
+            client.click("Native", "//*[@"+identifier[0]+"='"+identifier[1]+"']", 0, 1);
+            System.out.println("GOOD - Click on - "+identifier[0]+"="+identifier[1]);
+            return true;
 
-        if (entry.getValue().getTextContent() != null) {
-            if (!entry.getValue().getTextContent().equals("")) {
-                System.out.println("ClickingOnElementWithTEXT - text=" + entry.getValue().getTextContent());
-                try {
-                    client.click("Native", "text=" + entry.getValue().getTextContent(), 0, 1);
-                    command = ("ClickingOnElementWithTEXT - text="+entry.getValue().getTextContent());
-                    return true;
+        } catch (Exception e) {
+            System.out.println("BAD - Could not SClick on - "+identifier[0]+"="+identifier[1]);
+            System.out.println("Returning FALSE");
+            return false;
+        }
+    }
 
-                } catch (Exception e) {
-                    System.out.println("Could not click on text=" + entry.getValue().getTextContent());
-                    System.out.println("Returning FALSE");
-                    return false;
-                }
+    public Map<String, String> SendTextToElement(Map.Entry<String, Element> entry) {
+        Map<String, String> resultMap = new HashMap<>();
+        String[] identifier = GetIdentifier(entry);
+        if (identifier!= null){
+            System.out.println("Found a good identifier -" + identifier[0] +" = "+identifier[1]);
+            if(SendText(identifier)){
+                resultMap.put("result","true");
+                resultMap.put("step","SendText To - "+identifier[0] +" = "+identifier[1]);
+                return resultMap;
             }
         }
-       return false;
+        resultMap.put("result","false");
+        resultMap.put("step",null);
+        return resultMap;
+    }
 
+    private boolean SendText(String[] identifier) {
+        try {
+            client.click("Native", "//*[@"+identifier[0]+"='"+identifier[1]+"']", 0, 1);
+            client.sendText("company");
+            System.out.println("GOOD - SendText to - "+identifier[0]+"="+identifier[1]);
+            return true;
+
+        } catch (Exception e) {
+            System.out.println("BAD - Could not SendText to - "+identifier[0]+"="+identifier[1]);
+            System.out.println("Returning FALSE");
+            return false;
+        }
+    }
+
+    private String[] GetIdentifier(Map.Entry<String, Element> entry) {
+        String[] result = null;
+        NamedNodeMap Attributes = entry.getValue().getAttributes();
+        for (int i = 0; i < Attributes.getLength(); i++) {
+            Attr attr = (Attr) Attributes.item(i);
+            String attrName = attr.getNodeName();
+            String attrValue = attr.getNodeValue();
+            if (attrName.equals("id")){
+                result = new String[]{attrName, attrValue};
+                break;
+            }
+            else if (attrName.equals("contentDescription")){
+                result = new String[]{attrName, attrValue};
+                break;
+            }
+            else if (attrName.equals("text")){
+                result = new String[]{attrName, attrValue};
+                break;
+            }
+        }
+        return result;
     }
 }

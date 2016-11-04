@@ -57,8 +57,8 @@ public class Screen {
                         MAP.put("TextView_"+element.getAttribute("id") + " "+temp,element);
                     if(element.getAttribute("class").contains("ImageView"))
                         MAP.put("ImageView_"+element.getAttribute("id") + " "+temp,element);
-                    /*if(element.getAttribute("class").contains("EditText"))
-                        MAP.put("EditText_"+element.getAttribute("id") + " "+temp,element);*/
+                    if(element.getAttribute("class").contains("EditText"))
+                        MAP.put("EditText_"+element.getAttribute("id") + " "+temp,element);
                     if(element.getAttribute("class").contains("Button"))
                         MAP.put("Button_"+element.getAttribute("id") + " "+temp,element);
 
