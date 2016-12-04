@@ -26,7 +26,7 @@ public class TestFactory {
         System.out.println("Creating Functional Test For - "+currentScreen.screenName);
         PrintWriter out = null;
         try {
-            out = new PrintWriter("Tests\\FT_"+currentScreen.screenName+"_"+currentScreen.routes.size());
+            out = new PrintWriter("Results\\tests\\FT_"+currentScreen.screenName+"_"+currentScreen.routes.size());
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -44,7 +44,7 @@ public class TestFactory {
         System.out.println("Creating Layout Test For - "+currentScreen.screenName);
         PrintWriter out = null;
         try {
-            out = new PrintWriter("Tests\\LT_"+currentScreen.screenName);
+            out = new PrintWriter("Results\\tests\\LT_"+currentScreen.screenName);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }

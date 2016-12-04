@@ -28,11 +28,12 @@ public class Screen {
     String command;
     Map<String, Element>  elementsMap = null;
     List<List<String>> routes = null;
+    public List<String> liveRoute;
 
 
     public Screen(String command, String screenElements) throws IOException, SAXException, ParserConfigurationException {
         this.command =command;
-        this.screenName = command.substring(command.indexOf("=")+1).replace("'","").replace(":","_").trim();
+        this.screenName = command.substring(command.indexOf("=")+1).replace("'","").replace(":","_").trim()+"_"+ Runner.GetIndex();
 
         this.screenElements = screenElements;
 
@@ -42,6 +43,11 @@ public class Screen {
         routes = new ArrayList<>();
 
     }
+
+    private int GetIndex() {
+        return 0;
+    }
+
     public static Map<String, Element> GetVIPElementsFromDoc(Document elementsDoc) {
         Map<String,Element> MAP =new HashMap<>();
 
@@ -69,6 +75,7 @@ public class Screen {
         }
         return MAP;
     }
+
     public static void printDocument(Document doc, OutputStream out) throws IOException, TransformerException {
         TransformerFactory tf = TransformerFactory.newInstance();
         Transformer transformer = tf.newTransformer();
@@ -81,6 +88,7 @@ public class Screen {
         transformer.transform(new DOMSource(doc),
                 new StreamResult(new OutputStreamWriter(out, "UTF-8")));
     }
+
     public static String printElement(Element node) throws IOException, TransformerException {
         DOMImplementationLS lsImpl = (DOMImplementationLS)node.getOwnerDocument().getImplementation().getFeature("LS", "3.0");
         LSSerializer serializer = lsImpl.createLSSerializer();
@@ -91,6 +99,7 @@ public class Screen {
 
     public void AddRoute(List<String> commandList){
         routes.add(commandList);
+        liveRoute=commandList;
     }
 
     public List<String> getShortestRoute() {
@@ -103,6 +112,7 @@ public class Screen {
             }
 
         }
+        liveRoute=shortestRoute;
         return shortestRoute;
     }
 }

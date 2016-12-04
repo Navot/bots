@@ -15,7 +15,7 @@ import java.util.List;
  */
 public class ScreensManager {
     private Client client=null;
-    private List<Screen> screenList = null;
+    private static List<Screen> screenList = null;
     private int index = 0;
 
     public ScreensManager(Client client){
@@ -23,11 +23,20 @@ public class ScreensManager {
         screenList = new ArrayList<>();
     }
 
+    public static Screen GetScreenByName(String screenName){
+        for (int i = 0; i < screenList.size(); i++) {
+            if (screenList.get(i).screenName.equals(screenName)){
+                return screenList.get(i);
+            }
+        }
+        return null;
+    }
+
     public Screen CheckIfBeenHereBefore(Screen currentScreen) {
         System.out.println("Checking If We Have Been Here Before");
         Screen VisitedScreen=null;
         for (Screen repoScreen : screenList) {
-            if (!ChangeChecker.IsDumpDifferent(currentScreen,repoScreen))
+            if (!ChangeChecker.IsDumpDifferent(currentScreen,repoScreen.screenName))
             {
                 VisitedScreen = repoScreen;
                 System.out.println("We Were Here Before - It Was Called "+VisitedScreen.screenName);
@@ -48,31 +57,35 @@ public class ScreensManager {
         return true;
     }
 
-    public File AddToRepo(Screen currentScreen)  {
+    public boolean AddToRepo(Screen currentScreen)  {
         System.out.println("Writing Files To Repo");
-        File file = new File("dumps\\"+currentScreen.screenName+"_"+index+".xml");
+        File file = new File("C:\\Users\\navot\\IdeaProjects\\bots\\Results\\dumps\\"+currentScreen.screenName+"_"+index+".xml");
 
         try {
             BufferedWriter writer = new BufferedWriter(new FileWriter(file));
             writer.write(currentScreen.screenElements);
             writer.close();
+            System.out.println("Done Writing - "+file.getAbsolutePath());
         } catch (IOException e) {
             e.printStackTrace();
+            return false;
         }
-        System.out.println("Done Writing - "+file.getAbsolutePath());
+
         try {
-            Thread.sleep(100);
+            Thread.sleep(200);
             String capture = client.capture();
-            File repoFile =new File("dumps\\"+currentScreen.screenName+"_"+index+".png");
+            File repoFile =new File("C:\\Users\\navot\\IdeaProjects\\bots\\Results\\captures\\"+currentScreen.screenName+"_"+index+".png");
             FileUtils.copyFile(new File (capture), repoFile);
             System.out.println("Done Writing - "+repoFile.getAbsolutePath());
         } catch (IOException e) {
             e.printStackTrace();
+            return false;
         } catch (InterruptedException e) {
             e.printStackTrace();
+            return false;
         }
         index++;
-        return file;
+        return true;
     }
 
 

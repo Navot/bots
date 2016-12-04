@@ -12,12 +12,37 @@ import java.util.Map;
 /**
  * Created by navot on 12/10/2016.
  */
-public class Clicker {
+public class Worker {
     private Client client=null;
 
-    public Clicker(Client client){
+    public Worker(Client client){
         this.client=client;
     }
+
+    public Map<String, String> WorkTheElement(Map.Entry<String, Element> next) throws ParserConfigurationException, SAXException, IOException {
+        System.out.println("We Have An Element!!");
+        Map.Entry<String, Element> UIElement = next;
+        if(!UIElement.getValue().getAttribute("x").contains("-")&& !(Integer.parseInt(UIElement.getValue().getAttribute("y"))>1920)){
+            String elementKey = UIElement.getKey().toString();
+            System.out.println("IT'S A - " + elementKey);
+            if (elementKey.startsWith("Button")){
+                System.out.println("Get Ready For A Click!");
+                return ClickingOnElement(UIElement);
+            }else{
+                if (elementKey.startsWith("EditText")){
+                    System.out.println("Get Ready To Send Text!");
+                    return SendTextToElement(UIElement);
+                }else {
+                    System.out.println("Doing Nothing With This Element");
+
+                }
+            }
+        }
+        Map<String, String> nullResultMap = new HashMap<>();
+        nullResultMap.put("result","false");
+        return nullResultMap;
+    }
+
 
     public Map<String, String> ClickingOnElement(Map.Entry<String, Element> entry) throws IOException, ParserConfigurationException, SAXException {
         Map<String, String> resultMap = new HashMap<>();
@@ -79,7 +104,7 @@ public class Clicker {
         }
     }
 
-    private String[] GetIdentifier(Map.Entry<String, Element> entry) {
+    public String[] GetIdentifier(Map.Entry<String, Element> entry) {
         String[] result = null;
         NamedNodeMap Attributes = entry.getValue().getAttributes();
         for (int i = 0; i < Attributes.getLength(); i++) {

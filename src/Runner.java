@@ -4,30 +4,34 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 /**
  * Created by navot on 11/10/2016.
  */
-public class Start implements Runnable {
+public class Runner implements Runnable {
 
+    private static int index=0;
     protected Client client = null;
     private String host = "localhost";
     private int port = 8889;
     public static Map<String,String> MAP=null;
     public String appNameFromDevice="";
+    public static String lastScreen ="";
+    public static Worker worker = null;
+    public static ChangeChecker CC = null;
+    public static ScreensManager SM =null;
+    public static TestFactory TF = null;
+    public static Navigator NGR = null;
 
-    public static Map<String, String> getMAP() {
-        return MAP;
-    }
 
-    public Start(Map<String,String> MAP){
+    public Runner(Map<String,String> MAP){
         this.MAP=MAP;
     }
     @Override
     public void run() {
+
         try{
             client = SetUpClient(MAP.get("device"));
             appNameFromDevice = LaunchApp(MAP.get("appPath"),MAP.get("appString"));
@@ -37,10 +41,15 @@ public class Start implements Runnable {
 
         }
         try {
-            BotObject bot = new BotObject(client,appNameFromDevice);
-            List<String> commandsList= new ArrayList();
-            commandsList.add("Launching = LandingPage");
-            bot.BotRun(commandsList);
+            SM = new ScreensManager(client);
+            worker = new Worker(client);
+            CC = new ChangeChecker(client,appNameFromDevice);
+            TF = new TestFactory();
+            NGR = new Navigator(client);
+            BotObject bot = new BotObject();
+            List<String> route= new ArrayList();
+            route.add("Launching = LandingPage");
+            bot.BotRun(route, "SpringBoard");
             System.out.println("----------- DONE WITH APP -----------");
         } catch (IOException e) {
             e.printStackTrace();
@@ -49,8 +58,6 @@ public class Start implements Runnable {
         } catch (ParserConfigurationException e) {
             e.printStackTrace();
         }
-
-
     }
 
     public Client SetUpClient(String device) {
@@ -60,23 +67,24 @@ public class Start implements Runnable {
     }
 
     private String LaunchApp(String appPath,String appString)  {
-        //client.install(appPath,false,false);
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
         client.launch(appString,false,true);
-       /* client.click("NATIVE", "xpath=/*//*[@text='Username']", 0, 1);
-        client.sendText("company");
-        client.closeKeyboard();
-        client.click("NATIVE", "xpath=/*//*[@id='passwordTextField']", 0, 1);
-        client.sendText("company");
-
-        client.click("NATIVE", "xpath=/*//*[@id='loginButton']", 0, 1);*/
-
         String s = client.getCurrentApplicationName();
         client.syncElements(2000,20000);
         return s;
     }
+
+    public static int GetIndex() {
+        index++;
+        return index-1;
+    }
+
+    public static Map<String, String> getMAP() {
+        return MAP;
+    }
+
 }

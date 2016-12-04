@@ -1,5 +1,3 @@
-import com.experitest.client.Client;
-
 import org.apache.commons.io.FileUtils;
 import org.xml.sax.SAXException;
 
@@ -19,12 +17,12 @@ public class main {
 
         System.out.println("Let's Go");
         System.out.println("deleting history");
-        FileUtils.cleanDirectory(new File("C:\\Projects\\Bots\\bots\\Tests"));
-        FileUtils.cleanDirectory(new File("C:\\Projects\\Bots\\bots\\dumps"));
-
+        FileUtils.cleanDirectory(new File("Results\\dumps"));
+        FileUtils.cleanDirectory(new File("Results\\captures"));
+        FileUtils.cleanDirectory(new File("Results\\tests"));
         Map<String,String> MAP = RunSetUp.getRunDetails();
 
-        Thread thread = new Thread(new Start(MAP));
+        Thread thread = new Thread(new Runner(MAP));
         thread.start();
 
         while(thread.isAlive()){

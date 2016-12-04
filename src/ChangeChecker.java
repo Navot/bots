@@ -22,12 +22,12 @@ public class ChangeChecker {
         this.appNameFromDevice =appNameFromDevice;
     }
 
-    public static boolean IsDumpDifferent(Screen currentScreen, Screen lastScreen) {
-        if (lastScreen != null)
+    public static boolean IsDumpDifferent(Screen currentScreen, String lastScreen) {
+        if (lastScreen != "")
         {
             //double result = getWeight(lastScreen.screenElements, currentScreen.screenElements);
-            double result = getSecondWeight(lastScreen.elementsMap, currentScreen.elementsMap);
-            System.out.println("The Distance From "+currentScreen.screenName+" To Previous - " + lastScreen.screenName+ "  Is: " + result );
+            double result = getSecondWeight(ScreensManager.GetScreenByName(lastScreen).elementsMap, currentScreen.elementsMap);
+            System.out.println("The Distance From "+currentScreen.screenName+" To Previous - " + ScreensManager.GetScreenByName(lastScreen).screenName+ "  Is: " + result );
             if (result > 0.97)
                 return false;
             else {
@@ -92,4 +92,5 @@ public class ChangeChecker {
         else return false;
 
     }
+
 }
