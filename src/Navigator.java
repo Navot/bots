@@ -34,6 +34,7 @@ public class Navigator {
         if (command.contains("SendText")){
             client.click("NATIVE","//*[@"+command.substring(command.indexOf('-')+2,command.indexOf('=')+1)+"'"+command.substring(command.indexOf('=')+2)+"']",0,1);
             client.sendText("company");
+            client.closeKeyboard();
             client.syncElements(2000,20000);
         }
     }

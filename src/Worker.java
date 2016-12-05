@@ -94,6 +94,7 @@ public class Worker {
         try {
             client.click("Native", "//*[@"+identifier[0]+"='"+identifier[1]+"']", 0, 1);
             client.sendText("company");
+            client.closeKeyboard();
             System.out.println("GOOD - SendText to - "+identifier[0]+"="+identifier[1]);
             return true;
 
