@@ -13,16 +13,17 @@ import java.util.Map;
  * Created by navot on 12/10/2016.
  */
 public class Worker {
-    private Client client=null;
-
+    private Client client = null;
+    
     public Worker(Client client){
-        this.client=client;
+        System.out.println("Building a Worker");
+        this.client = client;
     }
 
     public Map<String, String> WorkTheElement(Map.Entry<String, Element> next) throws ParserConfigurationException, SAXException, IOException {
-        System.out.println("We Have An Element!!");
+        //System.out.println("We Have An Element!!");
         Map.Entry<String, Element> UIElement = next;
-        if(!UIElement.getValue().getAttribute("x").contains("-")&& !(Integer.parseInt(UIElement.getValue().getAttribute("y"))>1920)){
+        if(UIElement.getValue().getAttribute("top").contains("true") && !UIElement.getValue().getAttribute("x").contains("-")&& !(Integer.parseInt(UIElement.getValue().getAttribute("y"))>1920)){
             String elementKey = UIElement.getKey().toString();
             System.out.println("IT'S A - " + elementKey);
             if (elementKey.startsWith("Button")){
@@ -126,5 +127,9 @@ public class Worker {
             }
         }
         return result;
+    }
+
+    public void deviceAction(String command) {
+        client.deviceAction(command);
     }
 }

@@ -1,6 +1,8 @@
+
 import com.experitest.client.Client;
 import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Attr;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.xml.sax.SAXException;
@@ -13,20 +15,21 @@ import java.util.Map;
  * Created by navot on 12/10/2016.
  */
 public class ChangeChecker {
-    private Client client=null;
+  
 
     private String appNameFromDevice=null;
-
+    private Client client = null;
     public ChangeChecker(Client client, String appNameFromDevice){
-        this.client=client;
+        System.out.println("Building a Change Checker");
         this.appNameFromDevice =appNameFromDevice;
+        this.client = client;
     }
 
     public static boolean IsDumpDifferent(Screen currentScreen, String lastScreen) {
         if (lastScreen != "")
         {
-            //double result = getWeight(lastScreen.screenElements, currentScreen.screenElements);
-            double result = getSecondWeight(ScreensManager.GetScreenByName(lastScreen).elementsMap, currentScreen.elementsMap);
+            //double result = getWeight(lastScreen.screenElementsString, currentScreen.screenElementsString);
+            double result = getSecondWeight(currentScreen.elementsMap,ScreensManager.GetScreenByName(lastScreen).elementsMap);
             System.out.println("The Distance From "+currentScreen.screenName+" To Previous - " + ScreensManager.GetScreenByName(lastScreen).screenName+ "  Is: " + result );
             if (result > 0.97)
                 return false;
@@ -39,32 +42,37 @@ public class ChangeChecker {
         }
     }
 
-    private static double getSecondWeight(Map<String, Element> lastScreenElementsMap, Map<String, Element> currentScreenElementsMap) {
+    private static double getSecondWeight(Map<String, Element> currentScreenElementsMap, Map<String, Element> oldScreenElementsMap) {
 
         int strike=0;
 
-        for (Map.Entry<String, Element> currentEntry : currentScreenElementsMap.entrySet()){
-            for (Map.Entry<String, Element> lastScreenEntry : lastScreenElementsMap.entrySet()){
+        for (Map.Entry<String, Element> currentElementEntry : currentScreenElementsMap.entrySet()){
+            for (Map.Entry<String, Element> lastScreenEntry : oldScreenElementsMap.entrySet()){
 
-                NamedNodeMap currentEntryAttributes = currentEntry.getValue().getAttributes();
+                NamedNodeMap currentEntryAttributes = currentElementEntry.getValue().getAttributes();
                 int count=0;
                 for (int i = 0; i < currentEntryAttributes.getLength(); i++) {
                     Attr attr = (Attr) currentEntryAttributes.item(i);
                     String attrName = attr.getNodeName();
                     String attrValue = attr.getNodeValue();
                     //System.out.println("Found attribute: " + attrName + " with value: " + attrValue);
+                    try{
                     if (attrValue.equals(lastScreenEntry.getValue().getAttribute(attrName))){
                       count++;
+                    }else{
+                        //System.out.println("Difference" - );
+                    }
+                    }catch(Exception e){
+
                     }
                 }
-                if (count/currentEntryAttributes.getLength()>0.9){
+                if (count/currentEntryAttributes.getLength()>0.99 && (currentEntryAttributes.getLength()==lastScreenEntry.getValue().getAttributes().getLength())){
                     strike++;
-                    break;
                 }
             }
 
         }
-        int max = (currentScreenElementsMap.size()>lastScreenElementsMap.size()) ? currentScreenElementsMap.size() :lastScreenElementsMap.size();
+        int max = (oldScreenElementsMap.size()>currentScreenElementsMap.size()) ? oldScreenElementsMap.size() :currentScreenElementsMap.size();
 
         double result = (double)strike/(double)max;
         return result;
@@ -93,4 +101,31 @@ public class ChangeChecker {
 
     }
 
+    public static boolean IsDumpDifferentByElementsMap(Map elementsMap, String repoScreenName) {
+            //double result = getWeight(lastScreen.screenElementsString, currentScreen.screenElementsString);
+            double result = getSecondWeight(elementsMap,ScreensManager.GetScreenByName(repoScreenName).elementsMap);
+            System.out.println("The Distance From currentScreen To Previous - " + repoScreenName+ "  Is: " + result );
+            if (result > 0.90)
+                return false;
+            else {
+                return true;
+            }
+
+    }
+    public static boolean IsDumpDifferentByElementsString(String elementsString, String repoScreenName) throws IOException, SAXException, ParserConfigurationException {
+        //double result = getWeight(lastScreen.screenElementsString, currentScreen.screenElementsString);
+        if (!repoScreenName.equals("")) {
+            Document elementsDoc = Utilities.getDocumentFromString(elementsString);
+            double result = getSecondWeight(ScreensManager.GetVIPElementsFromDoc(elementsDoc),ScreensManager.GetScreenByName(repoScreenName).elementsMap);
+            System.out.println("The Distance From currentScreen To Previous - " + repoScreenName+ "  Is: " + result );
+            if (result > 0.99)
+                return false;
+            else {
+                return true;
+            }
+        } else {
+            return true;
+        }
+
+    }
 }

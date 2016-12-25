@@ -1,3 +1,4 @@
+import com.experitest.client.Client;
 import org.w3c.dom.Element;
 import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSSerializer;
@@ -16,21 +17,24 @@ import java.util.Map;
  */
 public class TestFactory {
 
+    private final Client client;
     List<List<Screen>> steps = null;
 
-    public TestFactory(){
+    public TestFactory(Client client){
         steps=new ArrayList<>();
+        this.client = client;
     }
 
     public void CreatePathTest(Screen currentScreen) {
         System.out.println("Creating Functional Test For - "+currentScreen.screenName);
         PrintWriter out = null;
         try {
-            out = new PrintWriter("Results\\tests\\FT_"+currentScreen.screenName+"_"+currentScreen.routes.size());
+            out = new PrintWriter("Results\\tests\\FT_"+currentScreen.screenName+"_"+currentScreen.allRoutes.size());
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        List<String> route = currentScreen.routes.get(currentScreen.routes.size()-1);
+        List<String> route = currentScreen.liveRoute;
+
         for (int i = 0; i < route.size(); i++) {
             out.println(route.get(i));
             out.println("---------------------------------------------------------------------------------------------------------------------------------------");

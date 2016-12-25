@@ -2,6 +2,7 @@ import org.apache.commons.io.FileUtils;
 import org.xml.sax.SAXException;
 
 
+import javax.swing.*;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.util.*;
@@ -22,7 +23,8 @@ public class main {
         FileUtils.cleanDirectory(new File("Results\\tests"));
         Map<String,String> MAP = RunSetUp.getRunDetails();
 
-        Thread thread = new Thread(new Runner(MAP));
+        //getPainter();
+        Thread thread = new Thread(new Runner(MAP,MAP.get("appPath")));
         thread.start();
 
         while(thread.isAlive()){
@@ -32,17 +34,6 @@ public class main {
 
         System.out.println("---------DONE-------------");
     }
-
-
-
-
-
-
-
-
-
-
-
 
 
 

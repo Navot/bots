@@ -13,6 +13,7 @@ import java.util.Map;
 public class Runner implements Runnable {
 
     private static int index=0;
+    private final String appPath;
     protected Client client = null;
     private String host = "localhost";
     private int port = 8889;
@@ -26,7 +27,8 @@ public class Runner implements Runnable {
     public static Navigator NGR = null;
 
 
-    public Runner(Map<String,String> MAP){
+    public Runner(Map<String,String> MAP,String appPath){
+        this.appPath = appPath;
         this.MAP=MAP;
     }
     @Override
@@ -34,22 +36,22 @@ public class Runner implements Runnable {
 
         try{
             client = SetUpClient(MAP.get("device"));
-            appNameFromDevice = LaunchApp(MAP.get("appPath"),MAP.get("appString"));
+            appNameFromDevice = LaunchApp(appPath,MAP.get("appString"));
         }catch (Exception e ){
             System.out.println("Cloud Not SetUp the Client");
             return;
-
         }
+        SM = new ScreensManager(client);
+        worker = new Worker(client);
+        CC = new ChangeChecker(client,appNameFromDevice);
+        TF = new TestFactory(client);
+        NGR = new Navigator(client);
         try {
-            SM = new ScreensManager(client);
-            worker = new Worker(client);
-            CC = new ChangeChecker(client,appNameFromDevice);
-            TF = new TestFactory();
-            NGR = new Navigator(client);
+
             BotObject bot = new BotObject();
             List<String> route= new ArrayList();
             route.add("Launching = LandingPage");
-            bot.BotRun(route, "SpringBoard");
+            bot.BotRun(route, "");
             System.out.println("----------- DONE WITH APP -----------");
         } catch (IOException e) {
             e.printStackTrace();
@@ -61,7 +63,7 @@ public class Runner implements Runnable {
     }
 
     public Client SetUpClient(String device) {
-        Client client = new Client(host, port, true);
+        Client client = new Client(host, port, false);
         client.waitForDevice(device,10000);
         return client;
     }
@@ -72,9 +74,10 @@ public class Runner implements Runnable {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        client.launch(appString,false,true);
+        client.install(appPath,true,false);
+        client.launch(appString,true,true);
+        //client.syncElements(2000,20000);
         String s = client.getCurrentApplicationName();
-        client.syncElements(2000,20000);
         return s;
     }
 

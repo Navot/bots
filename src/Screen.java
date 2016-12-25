@@ -1,7 +1,5 @@
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSSerializer;
 import org.xml.sax.SAXException;
@@ -17,63 +15,84 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 
 public class Screen {
     String screenName;
-    String screenElements;
+    String screenElementsString;
     String command;
     Map<String, Element>  elementsMap = null;
-    List<List<String>> routes = null;
+    List<List<String>> allRoutes = null;
     public List<String> liveRoute;
+    Screen backScreen = null;
 
 
-    public Screen(String command, String screenElements) throws IOException, SAXException, ParserConfigurationException {
-        this.command =command;
-        this.screenName = command.substring(command.indexOf("=")+1).replace("'","").replace(":","_").trim()+"_"+ Runner.GetIndex();
+    public Screen(List<String> route, String elementsString) throws IOException, SAXException, ParserConfigurationException {
+        this.command =route.get(route.size()-1);
 
-        this.screenElements = screenElements;
+        this.screenName = getName(command);
 
-        Document elementsDoc = Utilities.getDocumentFromString(screenElements);
-        elementsMap = GetVIPElementsFromDoc(elementsDoc);
+        this.screenElementsString = (elementsString.equals("")) ? Runner.CC.GetElements() : elementsString;
 
-        routes = new ArrayList<>();
+        Document elementsDoc = Utilities.getDocumentFromString(screenElementsString);
+        elementsMap = ScreensManager.GetVIPElementsFromDoc(elementsDoc);
 
+        allRoutes = new ArrayList<>();
+        allRoutes.add(route);
+        liveRoute = route;
+
+        ScrollProtocol();
+        NewScreenProtocol();
+        if (!screenName.contains("LandingPage") && !screenName.contains("Text")) {
+            backScreen = getBackScreen();
+            Runner.NGR.Navigate(this,backScreen);
+        }
+
+
+
+    }
+
+    private void ScrollProtocol() {
+        /*if(ScreenIsScrollable()){
+            scroll();
+            while (ScreenDIDScrolled()){
+                System.out.println("Screen Was Scrolled !!");
+                System.out.println("Getting new Elements");
+                AddElementsToElementsMap();
+                scroll();
+            }
+            System.out.println("Screen Does not Scroll now");
+
+        }*/
+    }
+
+    private void NewScreenProtocol() throws IOException, SAXException, ParserConfigurationException {
+        System.out.println("Adding a new Screen: "+screenName);
+        Runner.SM.AddScreen(this);
+        Runner.TF.CreatePathTest(this);
+        Runner.TF.CreateLayoutTest(this);
+
+        System.out.println("All Elements On the Screen:\n"+Utilities.MapToString(elementsMap));
+
+    }
+
+    private Screen getBackScreen() throws ParserConfigurationException, SAXException, IOException {
+        Runner.worker.deviceAction("back");
+        Screen temp = Runner.SM.CheckIfBeenHereBefore(Runner.CC.GetElements());
+        if (temp!=null){
+            System.out.println("The BACK screen for "+screenName + " is - "+temp.screenName);
+        }
+        return  temp;
+    }
+
+    private String getName(String command) {
+        return command.substring(command.indexOf("=")+1).replace("'","").replace(":","_").trim()+"_"+ Runner.GetIndex();
     }
 
     private int GetIndex() {
         return 0;
-    }
-
-    public static Map<String, Element> GetVIPElementsFromDoc(Document elementsDoc) {
-        Map<String,Element> MAP =new HashMap<>();
-
-        try {
-            NodeList nodeList = elementsDoc.getElementsByTagName("node");
-            for (int temp = 0; temp < nodeList.getLength(); temp++) {
-
-                Node node = nodeList.item(temp);
-                if (node.getNodeType() == Node.ELEMENT_NODE) {
-                    Element element = (Element) node;
-                  //  System.out.println(printElement(element));
-                    if(element.getAttribute("class").contains("TextView"))
-                        MAP.put("TextView_"+element.getAttribute("id") + " "+temp,element);
-                    if(element.getAttribute("class").contains("ImageView"))
-                        MAP.put("ImageView_"+element.getAttribute("id") + " "+temp,element);
-                    if(element.getAttribute("class").contains("EditText"))
-                        MAP.put("EditText_"+element.getAttribute("id") + " "+temp,element);
-                    if(element.getAttribute("class").contains("Button"))
-                        MAP.put("Button_"+element.getAttribute("id") + " "+temp,element);
-
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return MAP;
     }
 
     public static void printDocument(Document doc, OutputStream out) throws IOException, TransformerException {
@@ -96,16 +115,14 @@ public class Screen {
        return serializer.writeToString(node);
     }
 
-
-    public void AddRoute(List<String> commandList){
-        routes.add(commandList);
-        liveRoute=commandList;
+    public void AddRoute(List<String> route){
+        allRoutes.add(route);
     }
 
     public List<String> getShortestRoute() {
         List<String> shortestRoute = null;
         int minRouteLength = 1000;
-        for ( List<String> route : routes) {
+        for ( List<String> route : allRoutes) {
             if (route.size()<minRouteLength){
                 minRouteLength=route.size();
                 shortestRoute = route;

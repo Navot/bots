@@ -1,5 +1,9 @@
 import com.experitest.client.Client;
 import org.apache.commons.io.FileUtils;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -8,19 +12,23 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by navot on 12/10/2016.
  */
 public class ScreensManager {
-    private Client client=null;
+   
     private static List<Screen> screenList = null;
     private int index = 0;
-
+    private Client client = null;
+   
     public ScreensManager(Client client){
-        this.client=client;
+        System.out.println("Building a Screen Manager");
         screenList = new ArrayList<>();
+        this.client = client;
     }
 
     public static Screen GetScreenByName(String screenName){
@@ -32,22 +40,7 @@ public class ScreensManager {
         return null;
     }
 
-    public Screen CheckIfBeenHereBefore(Screen currentScreen) {
-        System.out.println("Checking If We Have Been Here Before");
-        Screen VisitedScreen=null;
-        for (Screen repoScreen : screenList) {
-            if (!ChangeChecker.IsDumpDifferent(currentScreen,repoScreen.screenName))
-            {
-                VisitedScreen = repoScreen;
-                System.out.println("We Were Here Before - It Was Called "+VisitedScreen.screenName);
-                return VisitedScreen;
-            }
-        }
 
-        System.out.println("We Weren't Here");
-        return null;
-
-    }
 
     public boolean AddScreen(Screen currentScreen) throws IOException, SAXException, ParserConfigurationException {
 
@@ -63,7 +56,7 @@ public class ScreensManager {
 
         try {
             BufferedWriter writer = new BufferedWriter(new FileWriter(file));
-            writer.write(currentScreen.screenElements);
+            writer.write(currentScreen.screenElementsString);
             writer.close();
             System.out.println("Done Writing - "+file.getAbsolutePath());
         } catch (IOException e) {
@@ -89,6 +82,50 @@ public class ScreensManager {
     }
 
 
+    public Screen CheckIfBeenHereBefore(String elementsString) throws IOException, SAXException, ParserConfigurationException {
+        System.out.println("Checking If We Have Been Here Before");
+        Screen VisitedScreen=null;
+        Document elementsDoc = Utilities.getDocumentFromString(elementsString);
+        Map elementsMap = GetVIPElementsFromDoc(elementsDoc);
+        for (Screen repoScreen : screenList) {
+            if (!ChangeChecker.IsDumpDifferentByElementsMap(elementsMap,repoScreen.screenName))
+            {
+                VisitedScreen = repoScreen;
+                System.out.println("We Were Here Before - It Was Called "+VisitedScreen.screenName);
+                return VisitedScreen;
+            }
+        }
 
+        System.out.println("We Weren't Here");
+        return null;
+    }
+    public static Map<String, Element> GetVIPElementsFromDoc(Document elementsDoc) {
+        Map<String,Element> MAP =new HashMap<>();
 
+        try {
+            NodeList nodeList = elementsDoc.getElementsByTagName("node");
+            for (int index = 0; index < nodeList.getLength(); index++) {
+
+                Node node = nodeList.item(index);
+                if (node.getNodeType() == Node.ELEMENT_NODE) {
+                    Element element = (Element) node;
+                    //  System.out.println(printElement(element));
+                    if(element.getAttribute("class").contains("ListView"))
+                        MAP.put("ListView_"+element.getAttribute("id") + " "+index,element);
+                    if(element.getAttribute("class").contains("TextView"))
+                        MAP.put("TextView_"+element.getAttribute("id") + " "+index,element);
+                    if(element.getAttribute("class").contains("ImageView"))
+                        MAP.put("ImageView_"+element.getAttribute("id") + " "+index,element);
+                    if(element.getAttribute("class").contains("EditText"))
+                        MAP.put("EditText_"+element.getAttribute("id") + " "+index,element);
+                    if(element.getAttribute("class").contains("Button"))
+                        MAP.put("Button_"+element.getAttribute("id") + " "+index,element);
+
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return MAP;
+    }
 }

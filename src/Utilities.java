@@ -57,4 +57,12 @@ public class Utilities {
         Map map = client.getLastCommandResultMap();
         return (String) map.get("logLine");
     }
+
+    public static void Sleep(int mili){
+        try {
+            Thread.sleep(mili);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 }
